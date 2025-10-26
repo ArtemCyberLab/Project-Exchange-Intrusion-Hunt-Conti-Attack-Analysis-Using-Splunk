@@ -1,0 +1,14 @@
+Project Objective
+The project is focused on conducting an investigation of a Microsoft Exchange compromise, characteristic of Conti-like ransomware campaigns, using Splunk for log collection, correlation, and analysis. The goal is to identify the initial entry point, propagation mechanisms, key indicators of compromise (IOCs), and develop recommendations for containment and system recovery.
+
+Project Description
+The project involved aggregating Sysmon, Windows Event, and IIS logs from the target Exchange environment. The analysis included filtering Sysmon events: EventCode=11 (file creation), EventCode=8 (process migration), EventCode=10/4688 (process access and creation), as well as examining IIS logs to detect suspicious POST requests to *.aspx files. Collected data was correlated with publicly available sources on Conti campaigns to confirm attack vectors and exploited vulnerabilities.
+
+The first indicator of compromise was the presence of an executable cmd.exe in an unusual user directory (C:\Users\Administrator\Documents\cmd.exe), detected via Sysmon EventCode=11. From this event, the file’s MD5 hash was extracted, and the distribution of related files, such as readme.txt, was analyzed. Command line analysis revealed the creation of a local user (net user /add securityninja ...), indicating persistence attempts by the attacker.
+
+Process migration analysis (EventCode=8) identified interactions between unsecapp.exe and powershell.exe, as well as access to lsass.exe, consistent with attempts to steal hashes and escalate privileges. IIS logs showed POST requests to suspicious *.aspx files, including a web shell named i3gfPctK1c2x.aspx, confirmed through command lines using attrib.exe and the Admin$ Exchange network path. These findings were cross-referenced with reports on Conti campaigns and relevant CVE exploits associated with Exchange/SMB vulnerabilities.
+
+Collected IOCs included MD5 hashes, web shell filenames, file paths, and command lines. A timeline of the attack was created, covering file creation, process migration, web shell deployment, and post-exploitation commands. Based on the analysis, a containment playbook was developed: isolating the affected host, collecting memory dumps for LSASS analysis, revoking and changing administrative credentials, removing the web shell, and verifying backups.
+
+Conclusion
+The investigation confirmed indicators of a Conti-like campaign: unusual executable file locations, widespread readme.txt files, web shell deployment, and attempts to steal hashes via lsass.exe. The collected IOCs and event timeline allow for compromise localization, containment, and Splunk monitoring configuration for early detection of similar incidents. The project demonstrates the effectiveness of detailed Sysmon logging, correlation with IIS data, and command line analysis for detecting and mitigating sophisticated attacks on Exchange infrastructure.
